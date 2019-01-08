@@ -1,4 +1,4 @@
-# CONDITOINAL STUDIO IDENTITY
+# CONDITIONAL STUDIO IDENTITY
 
 This is a first pass at implementing the Conditional Studio identity designed by WHL in p5js.
 
