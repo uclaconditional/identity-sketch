@@ -3,6 +3,7 @@ import * as dat from 'dat.gui';
 
 import * as glyphPatterns from './glyphs';
 import Glyph from './Glyph';
+import Layout from './Layout';
 
 export default class Sketch extends p5 {
   dotSize = 14;
@@ -16,36 +17,43 @@ export default class Sketch extends p5 {
   constructor() {
     super(() => {});
     this.seed = this.random(0, 10000);
-    this.gridSize = this.windowWidth / 71;
+    this.gridSize = this.windowWidth / 80;
   }
 
   setup = () => {
+    const canvas = this.createCanvas(this.windowWidth - 40, this.windowHeight - 40);
+    canvas.parent(document.querySelector('.logo')); // eslint-disable-line
+
     Object.keys(glyphPatterns).forEach((letter) => {
       if (!Array.isArray(this.glyphs[letter])) {
         this.glyphs[letter] = [];
       }
       glyphPatterns[letter].forEach((pat) => {
-        this.glyphs[letter].push(new Glyph(pat));
+        this.glyphs[letter].push(new Glyph(letter, pat));
       });
     });
 
-    this.createCanvas(this.windowWidth, this.windowHeight);
+    this.layout = new Layout(
+      this.width / this.gridSize,
+      this.height / this.gridSize,
+      this.getGlyphsForLayout(),
+    );
+
     const gui = new dat.GUI();
-    gui.add(this, 'gridSize', 1, 30);
+    gui.add(this, 'gridSize', 1, 30).onChange(() => {
+      this.layout.setSize(
+        Math.floor(this.width / this.gridSize),
+        Math.floor(this.height / this.gridSize),
+      );
+    });
     gui.add(this, 'dotSize', 1, 100);
     gui.add(this, 'displayGrid');
   };
 
   draw = () => {
     this.randomSeed(this.seed);
-    this.background(238);
     this.noStroke();
-
-    this.fill(23);
-    this.rect(
-      this.gridSize, this.gridSize,
-      this.width - (this.gridSize * 2), this.height - (this.gridSize * 2),
-    );
+    this.background(23);
 
     if (this.displayGrid) {
       this.stroke(0, 174, 239);
@@ -58,38 +66,41 @@ export default class Sketch extends p5 {
 
     this.noStroke();
     this.fill(this.dotColor);
-    this.drawGlyph(this.glyphs.c[0], 4, 4);
-    this.drawGlyph(this.glyphs.o[0], 10, 4);
-    this.drawGlyph(this.glyphs.n[0], 17, 4);
-    this.drawGlyph(this.glyphs.d[0], 23, 4);
-    this.drawGlyph(this.glyphs.i[0], 29, 4);
-    this.drawGlyph(this.glyphs.t[0], 34, 4);
-    this.drawGlyph(this.glyphs.i[1], 40, 4);
-    this.drawGlyph(this.glyphs.o[1], 45, 4);
-    this.drawGlyph(this.glyphs.n[1], 51, 4);
-    this.drawGlyph(this.glyphs.a[0], 57, 4);
-    this.drawGlyph(this.glyphs.l[0], 64, 4);
-
-    this.drawGlyph(this.glyphs.s[0], 4, 13);
-    this.drawGlyph(this.glyphs.t[1], 10, 13);
-    this.drawGlyph(this.glyphs.u[0], 17, 13);
-    this.drawGlyph(this.glyphs.d[1], 23, 13);
-    this.drawGlyph(this.glyphs.i[0], 29, 13);
-    this.drawGlyph(this.glyphs.o[1], 34, 13);
+    const p = this.layout.update();
+    this.push();
+    this.translate(2 * this.gridSize, 2 * this.gridSize);
+    p.forEach(this.drawPoint);
+    this.pop();
   };
 
   windowResized = () => {
-    this.resizeCanvas(this.windowWidth, this.windowHeight);
+    this.resizeCanvas(this.windowWidth - 40, this.windowHeight - 40);
   };
 
-  drawGlyph = (glyph, x, y) => {
-    this.push();
-    this.translate(x * this.gridSize, y * this.gridSize);
-    glyph.map.forEach(this.drawGlyphPoint);
-    this.pop();
-  }
-
-  drawGlyphPoint = ({ x, y }) => {
+  drawPoint = ({ x, y }) => {
     this.ellipse(x * this.gridSize, y * this.gridSize, this.dotSize, this.dotSize);
   }
+
+  getGlyphsForLayout = () => (
+    [
+      this.glyphs.c[0],
+      this.glyphs.o[0],
+      this.glyphs.n[0],
+      this.glyphs.d[0],
+      this.glyphs.i[0],
+      this.glyphs.t[0],
+      this.glyphs.i[1],
+      this.glyphs.o[1],
+      this.glyphs.n[1],
+      this.glyphs.a[0],
+      this.glyphs.l[0],
+      '\n',
+      this.glyphs.s[0],
+      this.glyphs.t[1],
+      this.glyphs.u[0],
+      this.glyphs.d[1],
+      this.glyphs.i[0],
+      this.glyphs.o[1],
+    ]
+  )
 }

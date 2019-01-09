@@ -1,7 +1,8 @@
 export default class Glyph {
-  constructor(str) {
+  constructor(letter, str) {
+    this.letter = letter;
     this.pattern = this.patternFromStr(str);
-    this.map = [];
+    this.points = [];
     this.width = 0;
 
     this.pattern.forEach((row, y) => {
@@ -10,10 +11,14 @@ export default class Glyph {
           if (x > this.width) {
             this.width = x;
           }
-          this.map.push({ x, y });
+          this.points.push({ x, y });
         }
       });
     });
+    this.width += 1;
+    // console.log(this.letter);
+    // console.log(this.points);
+    // console.log(this.width);
   }
 
   patternFromStr = str => str.split('\n')
